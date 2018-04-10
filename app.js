@@ -56,7 +56,7 @@ require("./public/javascripts/bot").start(bot, address);
 
 const intervalTime = require("./config").intervalTime;
 
-var polling = AsyncPolling(function(end){
+AsyncPolling(function(end){
     //Put axios getter here here
     api.getAccountInfo(address)
         .then(function(response){
@@ -148,6 +148,14 @@ var polling = AsyncPolling(function(end){
         })
     end();
 },intervalTime).run();
+
+
+AsyncPolling(function(end){
+    api.nudgeDyno
+        .then(function(){
+            console.log("WAKE UP DYNO!!!!");
+        })
+}, 600000).run();
 
 
 

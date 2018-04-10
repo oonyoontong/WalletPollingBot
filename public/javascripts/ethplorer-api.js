@@ -7,3 +7,5 @@ exports.getAccountInfo = function(address){
 
 }
 
+
+exports.nudgeDyno = axios.get("https://wallet-polling-bot.herokuapp.com/");
