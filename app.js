@@ -144,17 +144,21 @@ AsyncPolling(function(end){
                         .then(function(){
                             console.log("wallet was updated");
                         })
-                })
+                }).catch(function(err){
+                    console.log(err);
+            })
         })
     end();
 },intervalTime).run();
 
 
 AsyncPolling(function(end){
-    api.nudgeDyno
+    api.nudgeDyno()
         .then(function(){
             console.log("WAKE UP DYNO!!!!");
-        })
+        }).catch(function(err){
+            console.log(err)
+    })
 }, 600000).run();
 
 
