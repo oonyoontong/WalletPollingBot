@@ -6,4 +6,4 @@
 
 
 exports.address = "0xfbb1b73c4f0bda4f67dca266ce6ef42f520fbb98";
-exports.intervalTime = 30000;
+exports.intervalTime = 120000;
