@@ -144,10 +144,11 @@ AsyncPolling(function(end){
                         .then(function(){
                             console.log("wallet was updated");
                         })
-                }).catch(function(err){
-                    console.log(err);
+                })
             })
-        })
+        .catch(function(err){
+            console.log("Server is down");
+        });
     end();
 },intervalTime).run();
 
@@ -156,8 +157,9 @@ AsyncPolling(function(end){
     api.nudgeDyno()
         .then(function(){
             console.log("WAKE UP DYNO!!!!");
-        }).catch(function(err){
-            console.log(err)
+        })
+        .catch(function(err){
+            console.log("heroku server is down!")
     })
 }, 600000).run();
 

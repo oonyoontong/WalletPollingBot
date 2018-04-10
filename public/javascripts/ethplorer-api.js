@@ -9,5 +9,5 @@ exports.getAccountInfo = function(address){
 
 exports.nudgeDyno = function(){
     //"https://wallet-polling-bot.herokuapp.com/"
-    return axios.get("https://google.com");
+    return axios.get("https://wallet-polling-bot.herokuapp.com/");
 };
