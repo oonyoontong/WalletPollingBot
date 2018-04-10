@@ -55,11 +55,13 @@ require("./public/javascripts/bot").start(bot, address);
 ////////////////////////////////////////////////////////
 
 const intervalTime = require("./config").intervalTime;
+global.serverStatus = false;
 
 AsyncPolling(function(end){
     //Put axios getter here here
     api.getAccountInfo(address)
         .then(function(response){
+            serverStatus = true;
             console.log("received data from api");
 
             var wallet_raw = response.data;
@@ -148,6 +150,7 @@ AsyncPolling(function(end){
             })
         .catch(function(err){
             console.log("Server is down");
+            serverStatus = false;
         });
     end();
 },intervalTime).run();

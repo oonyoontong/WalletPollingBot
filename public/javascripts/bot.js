@@ -37,5 +37,13 @@ module.exports = {
                 })
 
         });
+
+        bot.onText(/\/server/, function(msg){
+            const chatId = msg.chat.id;
+            bot.sendMessage(chatId,serverStatus.toString());
+
+        });
+
+
     }
 }
