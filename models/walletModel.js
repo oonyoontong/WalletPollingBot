@@ -5,7 +5,7 @@ var tokenSchema = new Schema({
     dateAdded: Date,
     balance: Number,
     name: String,
-    symbol: String
+    symbol: String,
 },{ _id : false });
 
 var walletSchema = new Schema({

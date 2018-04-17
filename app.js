@@ -51,17 +51,31 @@ const bot = new TeleBot(token,{polling: true});
 const address = require("./config").address;
 
 require("./public/javascripts/bot").start(bot, address);
-
+bot.sendMessage(227801443,"*Bot is online.*",{parse_mode: "markdown"});
+bot.sendMessage(191222133,"*Bot is online.*",{parse_mode: "markdown"});
 ////////////////////////////////////////////////////////
 
 const intervalTime = require("./config").intervalTime;
-global.serverStatus = false;
+global.serverStatus = true;
 
 AsyncPolling(function(end){
     //Put axios getter here here
     api.getAccountInfo(address)
         .then(function(response){
-            serverStatus = true;
+
+            if (!serverStatus){
+                teleController.get_all()
+                    .then(function(sub_list){
+                        for (var i = 0;i < sub_list.length;i++){
+                            var serverfailure = "*Server is now online*";
+                            bot.sendMessage(sub_list[i].chatId, serverfailure, {parse_mode: "markdown"});
+                        }
+                    });
+
+                serverStatus = true;
+            }
+
+
             console.log("received data from api");
 
             var wallet_raw = response.data;
@@ -74,10 +88,13 @@ AsyncPolling(function(end){
             console.log("comparing new info with database");
             walletController.get_wallet(address)
                 .then(function(wallet_old){
-
                     if (wallet_old == null){
                         console.log("Its a new wallet!");
-                    } else if (wallet_old.tokens.length < wallet_clean.tokens.length){
+                        walletController.create_wallet(wallet_clean)
+                            .then(function(){
+                                console.log("wallet was created");
+                            })
+                    } else {/* else if (wallet_old.tokens.length < wallet_clean.tokens.length){
                         console.log("Found a new token");
 
                         difference = compare(wallet_clean.tokens,wallet_old.tokens);
@@ -123,7 +140,7 @@ AsyncPolling(function(end){
 
                     } else if (wallet_old.tokens.length == wallet_clean.tokens.length){
                         console.log("No change");
-                       /* difference = arr_diff([1,2,3],[2]);
+                       /!* difference = arr_diff([1,2,3],[2]);
                         console.log("Testing broadcast");
                         teleController.get_all()
                             .then(function(sub_list){
@@ -138,17 +155,51 @@ AsyncPolling(function(end){
                                     }
                                 }
                             });
-*/
+*!/
+                    }*/
+
+                        difference = compare(wallet_clean.tokens, wallet_old.tokens);
+                        console.log("DIFFERENCE LENGTH: " + difference.length)
+                        if (difference.length != 0){
+                            teleController.get_all()
+                                .then(function(sub_list){
+                                    for (var i = 0;i < sub_list.length;i++){
+
+                                        for (var j = 0;j < difference.length;j++){
+                                            console.log("New token: " + difference[j]);
+                                            var message = "*Token was added!*\n";
+                                            message += "Name: " + difference[j].name + "\n";
+                                            message += "Symbol: " + difference[j].symbol + "\n";
+                                            message += "Last Updated at " + wallet_old.lastUpdated;
+                                            bot.sendMessage(sub_list[i].chatId, message, {parse_mode: "markdown"});
+                                            console.log("message broadcasted")
+                                        }
+                                    }
+                                });
+                            walletController.add_token(difference,address)
+                                .then(function () {
+                                    console.log("new token was added");
+                                })
+                        }
+                        walletController.set_lastUpdated(address)
+                            .then(function(){
+                                console.log("updated time")
+                            })
+
                     }
-
-
-                    walletController.update_wallet(wallet_clean)
-                        .then(function(){
-                            console.log("wallet was updated");
-                        })
                 })
             })
         .catch(function(err){
+            if (serverStatus){
+                teleController.get_all()
+                    .then(function(sub_list){
+                        for (var i = 0;i < sub_list.length;i++){
+                            var serverfailure = "*SERVER HAS GONE DOWN*";
+                            bot.sendMessage(sub_list[i].chatId, serverfailure, {parse_mode: "markdown"});
+                        }
+                    });
+            }
+
             console.log("Server is down");
             serverStatus = false;
         });
@@ -156,39 +207,24 @@ AsyncPolling(function(end){
 },intervalTime).run();
 
 
-AsyncPolling(function(end){
-    api.nudgeDyno()
-        .then(function(){
-            console.log("WAKE UP DYNO!!!!");
-        })
-        .catch(function(err){
-            console.log("heroku server is down!")
-    })
-}, 600000).run();
-
-
 
 ////////////////////////////////////////////////////////
-function compare(x,y){
-    var longer;
-    var shorter;
+function compare(new_list,old_list){
+    
     var result = []
 
-    if (x.length > y.length){
-        longer = x;
-        shorter = y;
-    }
+    
 
-    for (var i = 0; i < longer.length;i++){
+    for (var i = 0; i < new_list.length;i++){
         var addToResult = true;
-        for (var j = 0; j < shorter.length;j++){
-            if (longer[i].symbol === shorter[j].symbol){
+        for (var j = 0; j < old_list.length;j++){
+            if (new_list[i].symbol === old_list[j].symbol){
                 addToResult = false;
                 break;
             }
         }
         if (addToResult){
-            result.push(longer[i]);
+            result.push(new_list[i]);
         }
     }
 

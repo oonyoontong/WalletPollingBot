@@ -24,4 +24,4 @@ exports.get_all = function(){
             resolve(subscribers);
         })
     })
-}
+};
